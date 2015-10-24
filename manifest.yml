@@ -1,0 +1,13 @@
+applications:
+- path: .
+  memory: 512M
+  instances: 1
+  domain: mybluemix.net
+  name: bookshop
+  host: bookshop
+  disk_quota: 1024M
+  services:
+  - bookshop-cloudantNoSQLDB
+  - bookshop-MonitoringAndAnalytics
+  - Mobile Client Access-5n
+  command: node app.js
