@@ -1,6 +1,7 @@
 // index.js
 
 var REST_DATA = 'api/favorites';
+var KEY_DATA = 'api/keys';
 var KEY_ENTER = 13;
 var defaultItems = [
 	
@@ -47,15 +48,6 @@ function loadItems(){
 	});
 }
 
-function startProgressIndicator(row)
-{	
-	row.innerHTML="<td class='content'>Uploading file... <img height=\"50\" width=\"50\" src=\"images/loading.gif\"></img></td>";	
-}
-
-function removeProgressIndicator(row)
-{
-	row.innerHTML="<td class='content'>uploaded...</td>";
-}
 
 function addNewRow(table)
 {
@@ -64,93 +56,21 @@ function addNewRow(table)
 	return table.lastChild;
 }
 
-function uploadFile(node)
-{
-	
-	var file = node.previousSibling.files[0];
-	
-	//if file not selected, throw error
-	if(!file)
-	{
-		alert("File not selected for upload... \t\t\t\t \n\n - Choose a file to upload. \n - Then click on Upload button.");
-		return;
-	}
-	
-	var row = node.parentNode.parentNode;
-	
-	var form = new FormData();
-	form.append("file", file);
-	
-	var id = row.getAttribute('data-id');
-	
-	var queryParams = "id=" + (id==null?-1:id);
-	queryParams+= "&name="+row.firstChild.firstChild.value;
-	queryParams+="&value="+row.firstChild.nextSibling.firstChild.firstChild.firstChild.firstChild.firstChild.value;
-	
-	
-	var table = row.firstChild.nextSibling.firstChild;	
-	var newRow = addNewRow(table);	
-	
-	startProgressIndicator(newRow);
-	
-	xhrAttach(REST_DATA+"/attach?"+queryParams, form, function(item){	
-		console.log('Item id - ' + item.id);
-		console.log('attached: ', item);
-		row.setAttribute('data-id', item.id);
-		removeProgressIndicator(row);
-		setRowContent(item, row);
-	}, function(err){
-		console.error(err);
-	});
-	
-}
-
-var attachButton = "<br><input type=\"file\" name=\"file\" id=\"upload_file\"><input width=\"100\" type=\"submit\" value=\"Upload\" onClick='uploadFile(this)'>";
-
 function setRowContent(item, row)
 {
-		var innerHTML = "<td class='content'><textarea id='nameText' onkeydown='onKey(event)'>"+item.name+"</textarea></td><td class='content'><table border=\"0\">";	
+		var innerHTML = "<td class='content'><textarea id='nameText' onkeydown='onKey(event)'>"+item.name+"</textarea></td>";	
 		
-		var valueTextArea = "<textarea id='valText' onkeydown='onKey(event)' placeholder=\"Enter a description...\"></textarea>";		
-		if(item.value)
-		{
-			valueTextArea="<textarea id='valText' onkeydown='onKey(event)'>"+item.value+"</textarea>";
-		}
+		var valueTextArea = "<td class='contentPrice'><textarea id='valText' onkeydown='onKey(event)' placeholder=\"Enter a description...\">" + item.value +"</textarea></td>";		
+		var priceTextArea = "<input id='priceText' type='number' min='1' step='1' onkeydown='onKey(event)' placeholder=\"100\">";		
+
+		innerHTML+=valueTextArea;
+		//innerHTML+="<td class='contentVal'>"+item.value+"</td>";
+		if (item.price) 
+			innerHTML+="<td class='contentPrice'>"+item.price+"</td>";
+		else
+			innerHTML+="<td class='contentPrice'>"+priceTextArea+"</td>";
 		
-		innerHTML+="<tr border=\"0\" ><td class='content'>"+valueTextArea+"</td></tr>";
-		          
-		
-		var attachments = item.attachements;
-		if(attachments && attachments.length>0)
-		{
-			
-			for(var i = 0; i < attachments.length; ++i){
-				var attachment = attachments[i];
-				if(attachment.content_type.indexOf("image/")==0)
-				{
-					innerHTML+= "<tr border=\"0\" ><td class='content'>"+attachment.key+"<br><img width=\"200\" src=\""+attachment.url+"\" onclick='window.open(\""+attachment.url+"\")'></img></td></tr>" ;
-
-
-				} else if(attachment.content_type.indexOf("audio/")==0)
-				{
-					innerHTML+= "<tr border=\"0\" ><td class='content'>"+attachment.key+"<br><AUDIO  height=\"50\" width=\"200\" src=\""+attachment.url+"\" controls></AUDIO></td></tr>" ;
-
-
-				} else if(attachment.content_type.indexOf("video/")==0)
-				{
-					innerHTML+= "<tr border=\"0\" ><td class='content'>"+attachment.key+"<br><VIDEO  height=\"100\" width=\"200\" src=\""+attachment.url+"\" controls></VIDEO></td></tr>" ;
-
-
-				} else if(attachment.content_type.indexOf("text/")==0 || attachment.content_type.indexOf("application/")==0)
-				{
-					innerHTML+= "<tr border=\"0\" ><td class='content'><a href=\""+attachment.url+"\" target=\"_blank\">"+attachment.key+"</a></td></tr>" ;
-
-				} 
-			}	
-			
-		}
-		
-		row.innerHTML = innerHTML+"</table>"+attachButton+"</td><td class = 'contentAction'><span class='deleteBtn' onclick='deleteItem(this)' title='delete me'></span></td>";
+		row.innerHTML = innerHTML+"<td class = 'contentAction'><span class='acceptBtn' onclick='acceptItem(this)' title='accept'></span><span class='deleteBtn' onclick='deleteItem(this)' title='delete me'></span></td>";
 	
 }
 
@@ -163,16 +83,14 @@ function addItem(item, isNew){
 		row.setAttribute('data-id', id);
 	}
 	
-	
-	
 	if(item) // if not a new row
 	{
 		setRowContent(item, row);
 	}
 	else //if new row
 	{
-		row.innerHTML = "<td class='content'><textarea id='nameText' onkeydown='onKey(event)' placeholder=\"Enter a title for your favourites...\"></textarea></td><td class='content'><table border=\"0\"><tr border=\"0\"><td class='content'><textarea id='valText'  onkeydown='onKey(event)' placeholder=\"Enter a description...\"></textarea></td></tr></table>"+attachButton+"</td>" +
-		    "<td class = 'contentAction'><span class='deleteBtn' onclick='deleteItem(this)' title='delete me'></span></td>";
+		row.innerHTML = "<td class='content'><textarea id='nameText' onkeydown='onKey(event)' placeholder=\"Describe the wager...\"></textarea></td><td class='contentVal'><textarea id='valText'  onkeydown='onKey(event)' placeholder=\"Expiration date...\"></textarea></td><td class='contentPrice'><input id='priceText' type='number' min='1' step='1' onkeydown='onKey(event)' placeholder=\"100\"></td>" +
+		    "<td class = 'contentAction'><span class='acceptBtn' onclick='acceptItem(this)' title='accept'></span><span class='deleteBtn' onclick='deleteItem(this)' title='delete me'></span></td>";
 	}
 
 	var table = document.getElementById('notes');
@@ -199,6 +117,34 @@ function deleteItem(deleteBtnNode){
 	}	
 }
 
+function acceptItem(acceptBtnNode){
+	var row = acceptBtnNode.parentNode.parentNode;
+	if(row.getAttribute('data-id'))
+	{
+		var newRow = document.createElement('tr');
+		newRow.className = "pubKeyRow";
+		pubKeyHTML = "<tr><td class='content'><input id='pubKey' placeholder=\"Enter your public key\"><span class='acceptBtn' onclick='saveKey(this,\""+row.getAttribute('data-id')+"\")' title='accept'></span></td></tr>";
+		newRow.innerHTML = pubKeyHTML;
+		var table = document.getElementById('notes');
+		row.parentNode.appendChild(newRow);
+	}	
+}
+
+function saveKey(evt, id) {
+	var keyNode = evt.parentNode.firstChild;
+	if(keyNode.id=="pubKey") {
+		var data = {
+			key: keyNode.value,
+			id: id
+		};			
+		xhrPut(KEY_DATA, data, function(){
+			console.log('saved key');
+			evt.parentNode.parentNode.remove();
+		}, function(err){
+			console.error(err);
+		});
+	}
+}
 
 function onKey(evt){
 	
@@ -206,26 +152,36 @@ function onKey(evt){
 		
 		evt.stopPropagation();
 		evt.preventDefault();
-		var nameV, valueV;
+		var nameV, valueV, priceV;
 		var row ; 		
 		
 		if(evt.target.id=="nameText")
 		{
 			row = evt.target.parentNode.parentNode;
 			nameV = evt.target.value;
-			valueV = row.firstChild.nextSibling.firstChild.firstChild.firstChild.firstChild.firstChild.value ;
+			valueV = evt.target.parentNode.nextSibling.firstChild.value;
+			priceV = evt.target.parentNode.nextSibling.nextSibling.firstChild.value;
 			
 		}
-		else
+		else if (evt.target.id=="valText")
 		{
-			row = evt.target.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
-			nameV = row.firstChild.firstChild.value;
+			row = evt.target.parentNode.parentNode;
+			nameV = evt.target.parentNode.previousSibling.firstChild.value;
 			valueV = evt.target.value;
+			priceV = evt.target.parentNode.nextSibling.firstChild.value;
 		}
-		
+		else if (evt.target.id=="priceText")
+		{
+			row = evt.target.parentNode.parentNode;
+			nameV = evt.target.parentNode.previousSibling.previousSibling.firstChild.value;
+			valueV = evt.target.parentNode.previousSibling.firstChild.value;
+			priceV = evt.target.value;
+		}
+
 		var data = {
 				name: nameV,
-				value: valueV
+				value: valueV,
+				price: priceV
 			};			
 		
 			if(row.isNew){
@@ -245,8 +201,10 @@ function onKey(evt){
 			}
 		
 	
-		if(row.nextSibling){
-			row.nextSibling.firstChild.firstChild.focus();
+		if(row.nextSibling) {
+		if(row.nextSibling.firstChild){
+			row.nextSibling.firstChild.focus();
+		}
 		}else{
 			addItem();
 		}
@@ -255,10 +213,14 @@ function onKey(evt){
 
 function saveChange(contentNode, callback){
 	var row = contentNode.parentNode.parentNode;
+	console.log(row);
+	console.log('save');
+
 	
 	var data = {
 		name: row.firstChild.firstChild.value,
-		value:row.firstChild.nextSibling.firstChild.value		
+		value:row.firstChild.nextSibling.firstChild.value,	
+		price:row.firstChild.nextSibling.nextSibling.firstChild.value		
 	};
 	
 	if(row.isNew){

@@ -65,16 +65,26 @@ function initDBConnection() {
 		}
 	} else{
 		console.warn('VCAP_SERVICES environment variable not set - data will be unavailable to the UI');
+
 		// For running this app locally you can get your Cloudant credentials 
 		// from Bluemix (VCAP_SERVICES in "cf env" output or the Environment 
 		// Variables section for an app in the Bluemix console dashboard).
 		// Alternately you could point to a local database here instead of a 
 		// Bluemix service.
-		//dbCredentials.host = "REPLACE ME";
-		//dbCredentials.port = REPLACE ME;
-		//dbCredentials.user = "REPLACE ME";
-		//dbCredentials.password = "REPLACE ME";
-		//dbCredentials.url = "REPLACE ME";
+		dbCredentials.host = "elaineo.cloudant.com";
+		dbCredentials.port = 443;
+		dbCredentials.user = "elaineo";
+		dbCredentials.password = "12345678";
+		dbCredentials.url = "https://elaineo:12345678@elaineo.cloudant.com";
+		cloudant = require('cloudant')(dbCredentials.url);
+		
+		// check if DB exists if not create
+		cloudant.db.create(dbCredentials.dbName, function (err, res) {
+			if (err) { console.log('could not create db ', err); }
+	    });
+		
+		db = cloudant.use(dbCredentials.dbName);
+		
 	}
 }
 
@@ -82,32 +92,25 @@ initDBConnection();
 
 app.get('/', routes.index);
 
-function createResponseData(id, name, value, attachments) {
+function createMultisig() {
+	curl -d '{"pubkeys": ["02a6dd6000c9676e45af8f799402e200efb42ebbbdc5fbf989d8727462509250ab", "02ac4d0fd693214f19eb7d4f3b88983667a767122c8aa15dbf3088b53ce6b25b7b", "036203ca827668edbadf381bc496a5194962170e0437254c156de528c9f46cf8d9"], "script_type": "multisig-2-of-3"}' https://api.blockcypher.com/v1/btc/test3/addrs
+}
+
+function createResponseData(id, name, value, price, attachments) {
 
 	var responseData = {
 		id : id,
 		name : name,
 		value : value,
+		price : price,
 		attachements : []
 	};
 	
-	 
-	attachments.forEach (function(item, index) {
-		var attachmentData = {
-			content_type : item.type,
-			key : item.key,
-			url : 'http://' + dbCredentials.user + ":" + dbCredentials.password
-					+ '@' + dbCredentials.host + '/' + dbCredentials.dbName
-					+ "/" + id + '/' + item.key
-		};
-		responseData.attachements.push(attachmentData);
-		
-	});
 	return responseData;
 }
 
 
-var saveDocument = function(id, name, value, pubkey0, pubkey1, watsonpubkey, watsonprivkey, watsonaddress, response) {
+var saveDocument = function(id, name, value, price, pubkey0, pubkey1, watsonpubkey, watsonprivkey, watsonaddress, response) {
 	
 	if(id === undefined) {
 		// Generated random id
@@ -117,6 +120,7 @@ var saveDocument = function(id, name, value, pubkey0, pubkey1, watsonpubkey, wat
 	db.insert({
 		name : name,
 		value : value,
+		price : price,
 		pubkey0 : pubkey0,
 		pubkey1 : pubkey1,
 		watsonpubkey : watsonpubkey,
@@ -134,117 +138,20 @@ var saveDocument = function(id, name, value, pubkey0, pubkey1, watsonpubkey, wat
 	
 }
 
-app.post('/api/favorites/attach', multipartMiddleware, function(request, response) {
-
-	console.log("Upload File Invoked..");
-	console.log('Request: ' + JSON.stringify(request.headers));
-	
-	var id;
-	
-	db.get(request.query.id, function(err, existingdoc) {		
-		
-		var isExistingDoc = false;
-		if (!existingdoc) {
-			id = '-1';
-		} else {
-			id = existingdoc.id;
-			isExistingDoc = true;
-		}
-
-		var name = request.query.name;
-		var value = request.query.value;
-
-		var file = request.files.file;
-		var newPath = './public/uploads/' + file.name;		
-		
-		var insertAttachment = function(file, id, rev, name, value, response) {
-			
-			fs.readFile(file.path, function(err, data) {
-				if (!err) {
-				    
-					if (file) {
-						  
-						db.attachment.insert(id, file.name, data, file.type, {rev: rev}, function(err, document) {
-							if (!err) {
-								console.log('Attachment saved successfully.. ');
-	
-								db.get(document.id, function(err, doc) {
-									console.log('Attachements from server --> ' + JSON.stringify(doc._attachments));
-										
-									var attachements = [];
-									var attachData;
-									for(var attachment in doc._attachments) {
-										if(attachment == value) {
-											attachData = {"key": attachment, "type": file.type};
-										} else {
-											attachData = {"key": attachment, "type": doc._attachments[attachment]['content_type']};
-										}
-										attachements.push(attachData);
-									}
-									var responseData = createResponseData(
-											id,
-											name,
-											value,
-											attachements);
-									console.log('Response after attachment: \n'+JSON.stringify(responseData));
-									response.write(JSON.stringify(responseData));
-									response.end();
-									return;
-								});
-							} else {
-								console.log(err);
-							}
-						});
-					}
-				}
-			});
-		}
-
-		if (!isExistingDoc) {
-			existingdoc = {
-				name : name,
-				value : value,
-				create_date : new Date()
-			};
-			
-			// save doc
-			db.insert({
-				name : name,
-				value : value
-			}, '', function(err, doc) {
-				if(err) {
-					console.log(err);
-				} else {
-					
-					existingdoc = doc;
-					console.log("New doc created ..");
-					console.log(existingdoc);
-					insertAttachment(file, existingdoc.id, existingdoc.rev, name, value, response);
-					
-				}
-			});
-			
-		} else {
-			console.log('Adding attachment to existing doc.');
-			console.log(existingdoc);
-			insertAttachment(file, existingdoc._id, existingdoc._rev, name, value, response);
-		}
-		
-	});
-
-});
 
 app.post('/api/favorites', function(request, response) {
 
 	console.log("Create Invoked..");
 	console.log("Name: " + request.body.name);
 	console.log("Value: " + request.body.value);
+	console.log("Price: " + request.body.price);
 	
 	// var id = request.body.id;
 	var name = request.body.name;
 	var value = request.body.value;
+	var price = request.body.price;
 	
-	saveDocument(null, name, value, '0', '1', '2', '3', '4', response);
+	saveDocument(null, name, value, price, '0', '1', '2', '3', '4', response);
 
 });
 
@@ -280,19 +187,52 @@ app.put('/api/favorites', function(request, response) {
 	var id = request.body.id;
 	var name = request.body.name;
 	var value = request.body.value;
+	var price = request.body.price;
 	
 	console.log("ID: " + id);
+	console.log("Price: " + price);
 	
 	db.get(id, { revs_info: true }, function(err, doc) {
 		if (!err) {
 			console.log(doc);
 			doc.name = name;
 			doc.value = value;
+			doc.price = price;
 			db.insert(doc, doc.id, function(err, doc) {
 				if(err) {
 					console.log('Error inserting data\n'+err);
 					return 500;
 				}
+				return 200;
+			});
+		}
+	});
+});
+
+app.put('/api/keys', function(request, response) {
+
+	console.log("Add Key..");
+	
+	var id = request.body.id;
+	var key = request.body.key;
+	
+	console.log("ID: " + id);
+	console.log("key: " + key);
+	
+	db.get(id, { revs_info: true }, function(err, doc) {
+		if (!err) {
+			console.log(doc);
+			if (doc.pubkey0)
+				doc.pubkey1 = key;
+			else
+				doc.pubkey0 = key;
+			db.insert(doc, doc.id, function(err, doc) {
+				if(err) {
+					console.log('Error inserting data\n'+err);
+					return 500;
+				}
+				// create multisig endpoitn
+
 				return 200;
 			});
 		}
@@ -356,6 +296,7 @@ app.get('/api/favorites', function(request, response) {
 										doc._id,
 										doc.name,
 										doc.value,
+										doc.price,
 										attachments);
 							
 							} else {
@@ -363,6 +304,7 @@ app.get('/api/favorites', function(request, response) {
 										doc._id,
 										doc.name,
 										doc.value,
+										doc.price,
 										[]);
 							}	
 						

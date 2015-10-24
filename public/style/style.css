@@ -69,13 +69,20 @@ table {
 }
 .content {
 	padding: 5px;
-	width: 60%;
-
+	width: 50%;
+    font-weight:bold;
 }
 .contentName {
+    padding: 5px;
+    width: 30%;
+}
+.contentPrice {
+    padding: 5px;
+    width: 20%;
+}
+.contentVal {
 	padding: 5px;
-	width: 30%;
-	font-weight:bold;
+	width: 20%;
 }
 .contentAction {
 	padding: 5px;
@@ -126,8 +133,14 @@ table {
   height: 16px;
     display:inline-block;
 }
-
-tr:hover .deleteBtn {
+.acceptBtn{
+  background-image: url("../images/sprite.png");
+  background-position: -5px -472px;
+  width: 16px;
+  height: 16px;
+    display:inline-block;
+}
+tr:hover .deleteBtn, .acceptBtn{
 	
 	cursor: pointer;
 }
