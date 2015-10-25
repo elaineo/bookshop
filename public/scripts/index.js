@@ -75,7 +75,11 @@ function setRowContent(item, row)
 }
 function setRowInfo(item, row)
 {
-		var innerHTML = "<td colspan='3'>" + item.pubkey0 + item.pubkey1 + item.watsonpubkey + item.watsonprivkey + item.watsonaddress + item.escrow + "</td>";	
+		var innerHTML = "<td colspan='3'>Created by: " + item.pubkey0 + "<br>";
+		innerHTML += "Accepted By: " + item.pubkey1 + "<br>";
+		innerHTML += "Watson's Public Key: " + item.watsonpubkey + "<br>";
+		innerHTML += "Watson's Secret Stuff: " + item.watsonprivkey + " <br>" + item.watsonaddress +"<br>"; 
+		innerHTML += "Escrow Address: "+ item.escrow + "</td>";	
 		
 		row.innerHTML = innerHTML;
 	

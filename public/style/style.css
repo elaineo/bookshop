@@ -154,7 +154,9 @@ tr:hover .deleteBtn, .acceptBtn{
 	cursor: pointer;
 }
 
-
+.infoRows{
+    font-size: 12px;
+}
 .tableRows{
 	border-bottom: solid thin;
 	border-color:#26343f;

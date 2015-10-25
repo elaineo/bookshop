@@ -94,8 +94,31 @@ initDBConnection();
 
 app.get('/', routes.index);
 
-function createMultisig() {
-	keys = '{"pubkeys": ["02a6dd6000c9676e45af8f799402e200efb42ebbbdc5fbf989d8727462509250ab", "02ac4d0fd693214f19eb7d4f3b88983667a767122c8aa15dbf3088b53ce6b25b7b", "036203ca827668edbadf381bc496a5194962170e0437254c156de528c9f46cf8d9"], "script_type": "multisig-2-of-3"}'
+function generateAddress(name, value, price, pubkey, response) {
+	var watson;
+	var post_options = {
+	      host: 'api.blockcypher.com',
+	      port: '80',
+	      path: '/v1/btc/test3/addrs',
+	      method: 'POST',
+	  };
+
+	  // Set up the request
+	  var post_req = http.request(post_options, function(res) {
+	      res.setEncoding('utf8');
+	      res.on('data', function (data) {
+	          var d = JSON.parse(data)
+			  saveDocument(null, name, value, price, pubkey, null, d.public, d.private, d.address, null, response);
+	      });
+	  });
+
+	  post_req.write("");
+	  post_req.end();
+}
+
+function createMultisig(doc, response) {
+  var keys = '{"pubkeys": ["' + doc.pubkey0 + '", "' + doc.pubkey1 + '", "' + doc.pubkeywatson + '"],"'
+  keys +=  '"script_type": "multisig-2-of-3"}'
 	//$.post('https://api.blockcypher.com/v1/btc/test3/addrs', querystring.stringify(keys)).then(function(d) {console.log(d)});
   var post_options = {
       host: 'api.blockcypher.com',
@@ -107,8 +130,18 @@ function createMultisig() {
   // Set up the request
   var post_req = http.request(post_options, function(res) {
       res.setEncoding('utf8');
-      res.on('data', function (chunk) {
-          console.log('Response: ' + chunk);
+      res.on('data', function (data) {
+          console.log('Response: ' + data);
+          var d = JSON.parse(data);
+          doc.escrow = d.address;
+          db.insert(doc, doc.id, function(err, doc) {
+				if(err) {
+					console.log('Error inserting data\n'+err);
+					response.sendStatus(500);
+				}
+				// create multisig endpoitn
+				response.sendStatus(200);
+			});
       });
   });
 
@@ -120,14 +153,19 @@ function createMultisig() {
 	*/
 }
 
-function createResponseData(id, name, value, price, attachments) {
+function createResponseData(doc) {
 
 	var responseData = {
-		id : id,
-		name : name,
-		value : value,
-		price : price,
-		attachements : []
+		id : doc._id,
+		name : doc.name,
+		value : doc.value,
+		price : doc.price,
+		pubkey0 : doc.pubkey0,
+		pubkey1 : doc.pubkey1,
+		watsonpubkey : doc.watsonpubkey,
+		watsonprivkey : doc.watsonprivkey,
+		watsonaddress : doc.watsonaddress,
+		escrow : doc.escrow
 	};
 	
 	return responseData;
@@ -136,9 +174,11 @@ function createResponseData(id, name, value, price, attachments) {
 
 var saveDocument = function(id, name, value, price, pubkey0, pubkey1, watsonpubkey, watsonprivkey, watsonaddress, escrow, response) {
 	
+	var newdoc = false;
 	if(id === undefined) {
 		// Generated random id
 		id = '';
+		newdoc = true;
 	}
 	
 	db.insert({
@@ -156,8 +196,9 @@ var saveDocument = function(id, name, value, price, pubkey0, pubkey1, watsonpubk
 		if(err) {
 			console.log(err);
 			response.sendStatus(500);
-		} else
+		} else {
 			response.sendStatus(200);
+		}
 		response.end();
 	});
 	
@@ -168,7 +209,6 @@ app.post('/api/favorites', function(request, response) {
 
 	console.log("Create Invoked..");
 	console.log("Name: " + request.body.name);
-	console.log("Value: " + request.body.value);
 	console.log("Pubkey: " + request.body.pubkey);
 	
 	// var id = request.body.id;
@@ -176,16 +216,16 @@ app.post('/api/favorites', function(request, response) {
 	var value = request.body.value;
 	var price = request.body.price;
 	var pubkey = request.body.pubkey;
-
-	// get a watson address
 	
-	saveDocument(null, name, value, price, pubkey, '1', '2', '3', '4', null, response);
+	generateAddress(name, value, price, pubkey, response);
+
+	//saveDocument(null, name, value, price, pubkey, '1', '2', '3', '4', null, response);
+
 
 });
 
 app.delete('/api/favorites', function(request, response) {
 
-	console.log("Delete Invoked..");
 	var id = request.query.id;
 	// var rev = request.query.rev; // Rev can be fetched from request. if
 	// needed, send the rev from client
@@ -254,16 +294,7 @@ app.put('/api/keys', function(request, response) {
 				doc.pubkey1 = key;
 			else
 				doc.pubkey0 = key;
-			db.insert(doc, doc.id, function(err, doc) {
-				if(err) {
-					console.log('Error inserting data\n'+err);
-					response.sendStatus(500);
-				}
-				// create multisig endpoitn
-
-				createMultisig(doc);
-				response.sendStatus(200);
-			});
+			createMultisig(doc, response);
 		}
 	});
 });
@@ -293,11 +324,7 @@ app.get('/api/favorites', function(request, response) {
 					} else {
 						
 						console.log('Document : '+JSON.stringify(doc));
-						var responseData = createResponseData(
-							doc.id,
-							docName,
-							docDesc,
-							[]);
+						var responseData = createResponseData(doc);
 						docList.push(responseData);
 						response.write(JSON.stringify(docList));
 						console.log(JSON.stringify(docList));
@@ -311,32 +338,7 @@ app.get('/api/favorites', function(request, response) {
 					
 					db.get(document.id, { revs_info: true }, function(err, doc) {
 						if (!err) {
-							if(doc['_attachments']) {
-							
-								var attachments = [];
-								for(var attribute in doc['_attachments']){
-								
-									if(doc['_attachments'][attribute] && doc['_attachments'][attribute]['content_type']) {
-										attachments.push({"key": attribute, "type": doc['_attachments'][attribute]['content_type']});
-									}
-									console.log(attribute+": "+JSON.stringify(doc['_attachments'][attribute]));
-								}
-								var responseData = createResponseData(
-										doc._id,
-										doc.name,
-										doc.value,
-										doc.price,
-										attachments);
-							
-							} else {
-								var responseData = createResponseData(
-										doc._id,
-										doc.name,
-										doc.value,
-										doc.price,
-										[]);
-							}	
-						
+							var responseData = createResponseData(doc);
 							docList.push(responseData);
 							i++;
 							if(i >= len) {
