@@ -196,7 +196,7 @@ var saveDocument = function(id, name, value, price, pubkey0, pubkey1, watsonpubk
 	var date = moment(value).format("YYYYMMDD");
 	db.insert({
 		name : name,
-		value : date,
+		value : parseInt(date),
 		price : parseInt(price),
 		pubkey0 : pubkey0,
 		pubkey1 : pubkey1,
@@ -279,8 +279,8 @@ app.put('/api/favorites', function(request, response) {
 		if (!err) {
 			console.log(doc);
 			doc.name = name;
-			doc.value = date;
-			doc.price = price;
+			doc.value = parseInt(date);
+			doc.price = parseInt(price);
 			db.insert(doc, doc.id, function(err, doc) {
 				if(err) {
 					console.log('Error inserting data\n'+err);
@@ -315,10 +315,7 @@ app.put('/api/keys', function(request, response) {
 });
 
 app.get('/api/favorites', function(request, response) {
-
-	console.log("Get method invoked.. ")
 	
-	db = cloudant.use(dbCredentials.dbName);
 	var docList = [];
 	var i = 0;
 	db.list({"sort": [{"value": "asc"}], "selector": {"value": {"$gt": 20151024} }}, function(err, body) {
@@ -378,16 +375,16 @@ app.get('/api/favorites', function(request, response) {
 app.get('/api/expired', function(request, response) {	
 	var docList = [];
 	var i = 0;
-	db.list({"sort": [{"value": "desc"}], "selector": {"value": {"$lt": 20151024} }}, function(err, body) {
+	expdb = cloudant.use('expired');
+	expdb.list({"sort": [{"value": "desc"}], "selector": {"value": {"$lt": 20151024} }}, function(err, body) {
 		if (!err) {
 			var len = body.rows.length;
-			console.log('total # of docs -> '+len);
 			if(len == 0) {
 				response.end();
 			} else {
 
 				body.rows.forEach(function(document) {
-					db.get(document.id, { revs_info: true }, function(err, doc) {
+					expdb.get(document.id, { revs_info: true }, function(err, doc) {
 						if (!err) {
 							var responseData = createResponseData(doc);
 							docList.push(responseData);
