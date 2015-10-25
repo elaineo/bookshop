@@ -70,7 +70,14 @@ function setRowContent(item, row)
 		else
 			innerHTML+="<td class='contentPrice'>"+priceTextArea+"</td>";
 		
-		row.innerHTML = innerHTML+"<td class = 'contentAction'><span class='acceptBtn' onclick='acceptItem(this)' title='accept'></span><span class='deleteBtn' onclick='deleteItem(this)' title='delete me'></span></td>";
+		row.innerHTML = innerHTML+"<td class = 'contentAction'><span class='acceptBtn' onclick='acceptItem(this)' title='accept'></span><span class='deleteBtn' onclick='deleteItem(this)' title='delete me'></span><span class='infoBtn' onclick='infoItem(this)'></span></td>";
+	
+}
+function setRowInfo(item, row)
+{
+		var innerHTML = "<td colspan='3'>" + item.pubkey0 + item.pubkey1 + item.watsonpubkey + item.watsonprivkey + item.watsonaddress + item.escrow + "</td>";	
+		
+		row.innerHTML = innerHTML;
 	
 }
 
@@ -86,6 +93,12 @@ function addItem(item, isNew){
 	if(item) // if not a new row
 	{
 		setRowContent(item, row);
+		// hidden info
+		var infoRow = document.createElement('tr');
+		infoRow.className = "infoRows";
+		infoRow.setAttribute('data-id', id);
+		infoRow.style.display = 'none';
+		setRowInfo(item, infoRow);
 	}
 	else //if new row
 	{
@@ -101,6 +114,8 @@ function addItem(item, isNew){
 	{
 		var textarea = row.firstChild.firstChild;
 		textarea.focus();
+	} else {
+		table.lastChild.appendChild(infoRow);
 	}
 	
 }
@@ -117,6 +132,11 @@ function deleteItem(deleteBtnNode){
 	}	
 }
 
+function infoItem(infoNode){
+	var row = infoNode.parentNode.parentNode.nextSibling;
+	row.style.display = (row.style.display != 'none' ? 'none' : '' );
+}
+
 function acceptItem(acceptBtnNode){
 	var row = acceptBtnNode.parentNode.parentNode;
 	if(row.getAttribute('data-id'))
@@ -126,7 +146,7 @@ function acceptItem(acceptBtnNode){
 		pubKeyHTML = "<tr><td class='content'><input id='pubKey' placeholder=\"Enter your public key\"><span class='acceptBtn' onclick='saveKey(this,\""+row.getAttribute('data-id')+"\")' title='accept'></span></td></tr>";
 		newRow.innerHTML = pubKeyHTML;
 		var table = document.getElementById('notes');
-		row.parentNode.appendChild(newRow);
+		row.parentNode.insertBefore(newRow, row.nextSibling);
 	}	
 }
 
@@ -137,7 +157,7 @@ function saveKey(evt, id) {
 			key: keyNode.value,
 			id: id
 		};			
-		xhrPut(KEY_DATA, data, function(){
+		xhrPut(KEY_DATA, data, function(stuff){
 			console.log('saved key');
 			evt.parentNode.parentNode.remove();
 		}, function(err){
@@ -177,11 +197,14 @@ function onKey(evt){
 			valueV = evt.target.parentNode.previousSibling.firstChild.value;
 			priceV = evt.target.value;
 		}
+		// get public key
+		var pubkey = document.getElementById('pubKey0').value;
 
 		var data = {
 				name: nameV,
 				value: valueV,
-				price: priceV
+				price: priceV,
+				pubkey: pubkey
 			};			
 		
 			if(row.isNew){

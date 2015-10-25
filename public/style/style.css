@@ -77,6 +77,7 @@ table {
     width: 30%;
 }
 .contentPrice {
+    text-align: center;
     padding: 5px;
     width: 20%;
 }
@@ -85,6 +86,7 @@ table {
 	width: 20%;
 }
 .contentAction {
+    text-align: right;
 	padding: 5px;
 	width: 10%;
 	font-weight:bold;
@@ -136,6 +138,13 @@ table {
 .acceptBtn{
   background-image: url("../images/sprite.png");
   background-position: -5px -472px;
+  width: 16px;
+  height: 16px;
+    display:inline-block;
+}
+.infoBtn{
+  background-image: url("../images/sprite.png");
+  background-position: -5px -122px;
   width: 16px;
   height: 16px;
     display:inline-block;

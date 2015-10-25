@@ -22,6 +22,8 @@ var logger = require('morgan');
 var errorHandler = require('errorhandler');
 var multipart = require('connect-multiparty')
 var multipartMiddleware = multipart();
+var querystring = require('querystring');
+var http = require('http');
 
 // all environments
 app.set('port', process.env.PORT || 3000);
@@ -93,7 +95,29 @@ initDBConnection();
 app.get('/', routes.index);
 
 function createMultisig() {
-	curl -d '{"pubkeys": ["02a6dd6000c9676e45af8f799402e200efb42ebbbdc5fbf989d8727462509250ab", "02ac4d0fd693214f19eb7d4f3b88983667a767122c8aa15dbf3088b53ce6b25b7b", "036203ca827668edbadf381bc496a5194962170e0437254c156de528c9f46cf8d9"], "script_type": "multisig-2-of-3"}' https://api.blockcypher.com/v1/btc/test3/addrs
+	keys = '{"pubkeys": ["02a6dd6000c9676e45af8f799402e200efb42ebbbdc5fbf989d8727462509250ab", "02ac4d0fd693214f19eb7d4f3b88983667a767122c8aa15dbf3088b53ce6b25b7b", "036203ca827668edbadf381bc496a5194962170e0437254c156de528c9f46cf8d9"], "script_type": "multisig-2-of-3"}'
+	//$.post('https://api.blockcypher.com/v1/btc/test3/addrs', querystring.stringify(keys)).then(function(d) {console.log(d)});
+  var post_options = {
+      host: 'api.blockcypher.com',
+      port: '80',
+      path: '/v1/btc/test3/addrs',
+      method: 'POST',
+  };
+
+  // Set up the request
+  var post_req = http.request(post_options, function(res) {
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+          console.log('Response: ' + chunk);
+      });
+  });
+
+  // post the data
+  post_req.write(querystring.stringify(keys));
+  post_req.end();
+
+	/*curl -d '{"pubkeys": ["02a6dd6000c9676e45af8f799402e200efb42ebbbdc5fbf989d8727462509250ab", "02ac4d0fd693214f19eb7d4f3b88983667a767122c8aa15dbf3088b53ce6b25b7b", "036203ca827668edbadf381bc496a5194962170e0437254c156de528c9f46cf8d9"], "script_type": "multisig-2-of-3"}' https://api.blockcypher.com/v1/btc/test3/addrs
+	*/
 }
 
 function createResponseData(id, name, value, price, attachments) {
@@ -110,7 +134,7 @@ function createResponseData(id, name, value, price, attachments) {
 }
 
 
-var saveDocument = function(id, name, value, price, pubkey0, pubkey1, watsonpubkey, watsonprivkey, watsonaddress, response) {
+var saveDocument = function(id, name, value, price, pubkey0, pubkey1, watsonpubkey, watsonprivkey, watsonaddress, escrow, response) {
 	
 	if(id === undefined) {
 		// Generated random id
@@ -125,7 +149,8 @@ var saveDocument = function(id, name, value, price, pubkey0, pubkey1, watsonpubk
 		pubkey1 : pubkey1,
 		watsonpubkey : watsonpubkey,
 		watsonprivkey : watsonprivkey,
-		watsonaddress : watsonaddress
+		watsonaddress : watsonaddress,
+		escrow : escrow
 
 	}, id, function(err, doc) {
 		if(err) {
@@ -144,14 +169,17 @@ app.post('/api/favorites', function(request, response) {
 	console.log("Create Invoked..");
 	console.log("Name: " + request.body.name);
 	console.log("Value: " + request.body.value);
-	console.log("Price: " + request.body.price);
+	console.log("Pubkey: " + request.body.pubkey);
 	
 	// var id = request.body.id;
 	var name = request.body.name;
 	var value = request.body.value;
 	var price = request.body.price;
+	var pubkey = request.body.pubkey;
+
+	// get a watson address
 	
-	saveDocument(null, name, value, price, '0', '1', '2', '3', '4', response);
+	saveDocument(null, name, value, price, pubkey, '1', '2', '3', '4', null, response);
 
 });
 
@@ -201,9 +229,9 @@ app.put('/api/favorites', function(request, response) {
 			db.insert(doc, doc.id, function(err, doc) {
 				if(err) {
 					console.log('Error inserting data\n'+err);
-					return 500;
+					response.sendStatus(500);
 				}
-				return 200;
+				response.sendStatus(200);
 			});
 		}
 	});
@@ -229,11 +257,12 @@ app.put('/api/keys', function(request, response) {
 			db.insert(doc, doc.id, function(err, doc) {
 				if(err) {
 					console.log('Error inserting data\n'+err);
-					return 500;
+					response.sendStatus(500);
 				}
 				// create multisig endpoitn
 
-				return 200;
+				createMultisig(doc);
+				response.sendStatus(200);
 			});
 		}
 	});
