@@ -143,13 +143,16 @@ function createMultisig(doc, response) {
           console.log('Response: ' + data);
           var d = JSON.parse(data);
           doc.escrow = d.address;
+          var responseData = createResponseData(doc);
+		  response.write(JSON.stringify(doc));
           db.insert(doc, doc.id, function(err, doc) {
 				if(err) {
 					console.log('Error inserting data\n'+err);
 					response.sendStatus(500);
+				} else {
+		  			response.end();
+					//response.sendStatus(200);
 				}
-				// create multisig endpoitn
-				response.sendStatus(200);
 			});
       });
   });
@@ -206,6 +209,8 @@ var saveDocument = function(id, name, value, price, pubkey0, pubkey1, watsonpubk
 			console.log(err);
 			response.sendStatus(500);
 		} else {
+			var responseData = createResponseData(doc);
+			response.write(JSON.stringify(responseData));
 			response.sendStatus(200);
 		}
 		response.end();
@@ -337,7 +342,6 @@ app.get('/api/favorites', function(request, response) {
 						docList.push(responseData);
 						response.write(JSON.stringify(docList));
 						console.log(JSON.stringify(docList));
-						console.log('ending response...');
 						response.end();
 					}
 				});
@@ -370,6 +374,19 @@ app.get('/api/favorites', function(request, response) {
 
 });
 
+app.get('/bet/:docid',  function(req, res){
+    var id = request.params.docid;
+    
+    console.log("ID: " + id);
+    
+    db.get(id, { revs_info: true }, function(err, doc) {
+        if (!err) {
+        	var responseData = createResponseData(doc);
+        	response.write(JSON.stringify(responseData));
+        	response.end();
+        }
+    });
+});
 
 http.createServer(app).listen(app.get('port'), '0.0.0.0', function() {
 	console.log('Express server listening on port ' + app.get('port'));

@@ -7,8 +7,8 @@ var defaultItems = [
     
 ];
 
-function loadItems(){
-    xhrGet(REST_DATA, function(data){
+function loadItems(data_url, isHome){
+    xhrGet(data_url, function(data){
         
         var receivedItems = data || [];
         var items = [];
@@ -25,7 +25,7 @@ function loadItems(){
             items = defaultItems;
         }
         for(i = 0; i < items.length; ++i){
-            addItem(items[i], !hasItems);
+            addItem(items[i], isHome, !hasItems);
         }
         if(!hasItems){
             var table = document.getElementById('notes');
@@ -45,16 +45,16 @@ function loadItems(){
     });
 }
 
-
-
-
-
-function addItem(item){
+function addItem(item, isHome){
 
     var row = document.createElement('article');
     row.setAttribute('data-id', item.id);
 
-    var innerHTML = "<section class='head'><h3>"+item.name+"</h3>";
+    var innerHTML = "<section class='head'" 
+    if (!isHome){
+        innerHTML += " onclick='acceptItem(this)' "
+    }
+    innerHTML += "><h3>"+item.name+"</h3>";
     innerHTML += "<div class='date'> " + item.value + " - " + item.price + " bits </div>"
     innerHTML += "</section></article>"; 
     row.innerHTML = innerHTML;
@@ -64,6 +64,20 @@ function addItem(item){
     
 }
 
-
-
-loadItems();
+function acceptItem(acceptBtnNode){
+    var row = acceptBtnNode.parentNode;
+    if(row.getAttribute('data-id'))
+    {
+        var data = {
+            key: "036203ca827668edbadf381bc496a5194962170e0437254c156de528c9f46cf8d9",
+            id: row.getAttribute('data-id')
+        };          
+        xhrPut(KEY_DATA, data, function(stuff){
+            console.log(stuff);
+            alert("Wager accepted!");
+            //acceptBtnNode.parentNode.remove();
+        }, function(err){
+            console.error(err);
+        });
+    }   
+}

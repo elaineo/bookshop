@@ -11,10 +11,8 @@
   <div class="wrap">
     <header>
     	<div class="logo">
-    		<a href="index.html">
     			<img src="images/watson.png" />
-    			<span class="title">watson's<span>book</span> shop</span>
-    		</a>
+    			<span class="title">watson's <span>book</span> shop</span>
     	</div>   
 		<nav class="horizontal menu center">
             <ul>
@@ -31,6 +29,10 @@
     </footer>
     <script type="text/javascript" src="/scripts/util.js"></script>
     <script type="text/javascript" src="/scripts/client.js"></script>
+    <script>
+    var REST_DATA = 'api/favorites';
+    loadItems(REST_DATA, true);
+    </script>
   </div>
 
 </body>

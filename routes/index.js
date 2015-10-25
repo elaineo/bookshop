@@ -16,3 +16,4 @@ exports.create = function(req, res){
 exports.market = function(req, res){
   res.render('market.html', { title: 'Watson\'s Book Shop' });
 };
+
