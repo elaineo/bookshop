@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <title>Watson's Book Shop</title>
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Watson's Book Shop">
   <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=no" />
   <link href="/style/client.css" rel="stylesheet" type="text/css" media="all"/>
 </head>
@@ -33,4 +36,15 @@
         </nav>
   </div>
 </body>
+<script>
+  var a=document.getElementsByTagName("a");
+  for(var i=0;i<a.length;i++)
+  {
+      a[i].onclick=function()
+      {
+          window.location=this.getAttribute("href");
+          return false
+      }
+  }
+</script>
 </html>

@@ -2,9 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+      <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Watson's Book Shop">
   <title>Watson's Book Shop</title>
   <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=no" />
   <link href="style/client.css" rel="stylesheet" type="text/css" media="all"/>
+      <link href="/images/apple-touch-icon-144x144.png" sizes="144x144" rel="icon">
+    <link href="/images/apple-touch-icon-114x114.png" sizes="114x114" rel="icon">
+    <link href="/images/apple-touch-icon-144x144.png" sizes="144x144" rel="apple-touch-icon">
+    <link href="/images/apple-touch-icon-114x114.png" sizes="114x114" rel="apple-touch-icon">
+    <link href="/images/apple-touch-icon-76x76.png" sizes="76x76" rel="apple-touch-icon">
+    <link href="/images/apple-touch-icon-72x72.png" sizes="72x72" rel="apple-touch-icon">
+    <link href="/images/apple-touch-icon-57x57.png" sizes="57x57" rel="apple-touch-icon">
+    <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
 </head>
 
 <body>
@@ -32,6 +43,16 @@
     <script>
     var REST_DATA = 'api/favorites';
     loadItems(REST_DATA, true);
+
+      var a=document.getElementsByTagName("a");
+  for(var i=0;i<a.length;i++)
+  {
+      a[i].onclick=function()
+      {
+          window.location=this.getAttribute("href");
+          return false
+      }
+  }
     </script>
   </div>
 
