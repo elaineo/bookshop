@@ -30,6 +30,7 @@ var multipart = require('connect-multiparty')
 var multipartMiddleware = multipart();
 var querystring = require('querystring');
 var http = require('http');
+var moment = require('moment');
 
 // all environments
 app.set('port', process.env.PORT || 3000);
@@ -170,7 +171,7 @@ function createResponseData(doc) {
 	var responseData = {
 		id : doc._id,
 		name : doc.name,
-		value : doc.value,
+		value : moment(doc.value, "YYYYMMDD").format("MM/DD/YYYY"),
 		price : doc.price,
 		pubkey0 : doc.pubkey0,
 		pubkey1 : doc.pubkey1,
@@ -192,11 +193,11 @@ var saveDocument = function(id, name, value, price, pubkey0, pubkey1, watsonpubk
 		id = '';
 		newdoc = true;
 	}
-	
+	var date = moment(value).format("YYYYMMDD");
 	db.insert({
 		name : name,
-		value : value,
-		price : price,
+		value : date,
+		price : parseInt(price),
 		pubkey0 : pubkey0,
 		pubkey1 : pubkey1,
 		watsonpubkey : watsonpubkey,
@@ -211,9 +212,8 @@ var saveDocument = function(id, name, value, price, pubkey0, pubkey1, watsonpubk
 		} else {
 			var responseData = createResponseData(doc);
 			response.write(JSON.stringify(responseData));
-			response.sendStatus(200);
+			response.end();
 		}
-		response.end();
 	});
 	
 }
@@ -270,6 +270,7 @@ app.put('/api/favorites', function(request, response) {
 	var name = request.body.name;
 	var value = request.body.value;
 	var price = request.body.price;
+	var date = moment(value).format("YYYYMMDD");
 	
 	console.log("ID: " + id);
 	console.log("Price: " + price);
@@ -278,7 +279,7 @@ app.put('/api/favorites', function(request, response) {
 		if (!err) {
 			console.log(doc);
 			doc.name = name;
-			doc.value = value;
+			doc.value = date;
 			doc.price = price;
 			db.insert(doc, doc.id, function(err, doc) {
 				if(err) {
@@ -320,7 +321,7 @@ app.get('/api/favorites', function(request, response) {
 	db = cloudant.use(dbCredentials.dbName);
 	var docList = [];
 	var i = 0;
-	db.list(function(err, body) {
+	db.list({"sort": [{"value": "asc"}], "selector": {"value": {"$gt": 20151024} }}, function(err, body) {
 		if (!err) {
 			var len = body.rows.length;
 			console.log('total # of docs -> '+len);
@@ -374,16 +375,54 @@ app.get('/api/favorites', function(request, response) {
 
 });
 
+app.get('/api/expired', function(request, response) {	
+	var docList = [];
+	var i = 0;
+	db.list({"sort": [{"value": "desc"}], "selector": {"value": {"$lt": 20151024} }}, function(err, body) {
+		if (!err) {
+			var len = body.rows.length;
+			console.log('total # of docs -> '+len);
+			if(len == 0) {
+				response.end();
+			} else {
+
+				body.rows.forEach(function(document) {
+					db.get(document.id, { revs_info: true }, function(err, doc) {
+						if (!err) {
+							var responseData = createResponseData(doc);
+							docList.push(responseData);
+							i++;
+							if(i >= len) {
+								response.write(JSON.stringify(docList));
+								console.log('ending response...');
+								response.end();
+							}
+						} else {
+							console.log(err);
+						}
+					});
+					
+				});
+			}
+			
+		} else {
+			console.log(err);
+		}
+	});
+
+});
+
+
 app.get('/bet/:docid',  function(req, res){
-    var id = request.params.docid;
+    var id = req.params.docid;
     
     console.log("ID: " + id);
     
     db.get(id, { revs_info: true }, function(err, doc) {
         if (!err) {
         	var responseData = createResponseData(doc);
-        	response.write(JSON.stringify(responseData));
-        	response.end();
+        	res.render('fund.html', { title: 'Watson\'s Book Shop',
+        								data: responseData });
         }
     });
 });

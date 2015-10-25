@@ -1,16 +1,16 @@
 // index.js
 
 var REST_DATA = 'api/favorites';
+var EXPIRED = 'api/expired';
 var KEY_DATA = 'api/keys';
 var KEY_ENTER = 13;
 var defaultItems = [
 	
 ];
 
-function loadItems(){
-	xhrGet(REST_DATA, function(data){
+function loadItems(data_url, tableName){
+	xhrGet(data_url, function(data){
 		
-		//stop showing loading message
 		stopLoadingMessage();
 		
 		var receivedItems = data || [];
@@ -28,10 +28,10 @@ function loadItems(){
 			items = defaultItems;
 		}
 		for(i = 0; i < items.length; ++i){
-			addItem(items[i], !hasItems);
+			addItem(items[i], !hasItems, tableName);
 		}
 		if(!hasItems){
-			var table = document.getElementById('notes');
+			var table = document.getElementById(tableName);
 			var nodes = [];
 			for(i = 0; i < table.rows.length; ++i){
 				nodes.push(table.rows[i].firstChild.firstChild);
@@ -85,7 +85,9 @@ function setRowInfo(item, row)
 	
 }
 
-function addItem(item, isNew){
+function addItem(item, isNew, tableName){
+	if (!tableName)
+		tableName='notes';
 	
 	var row = document.createElement('tr');
 	row.className = "tableRows";
@@ -110,7 +112,7 @@ function addItem(item, isNew){
 		    "<td class = 'contentAction'><span class='acceptBtn' onclick='acceptItem(this)' title='accept'></span><span class='deleteBtn' onclick='deleteItem(this)' title='delete me'></span></td>";
 	}
 
-	var table = document.getElementById('notes');
+	var table = document.getElementById(tableName);
 	table.lastChild.appendChild(row);
 	row.isNew = !item || isNew;
 	
@@ -290,6 +292,7 @@ function stopLoadingMessage()
 
 showLoadingMessage();
 //updateServiceInfo();
-loadItems();
+loadItems(REST_DATA, 'notes');
+loadItems(EXPIRED, 'expired');
 
 

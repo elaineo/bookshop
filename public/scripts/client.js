@@ -74,7 +74,7 @@ function acceptItem(acceptBtnNode){
         };          
         xhrPut(KEY_DATA, data, function(stuff){
             console.log(stuff);
-            alert("Wager accepted!");
+            window.location='/bet/' + stuff._id;
             //acceptBtnNode.parentNode.remove();
         }, function(err){
             console.error(err);
