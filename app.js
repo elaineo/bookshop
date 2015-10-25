@@ -2,7 +2,7 @@
  * Module dependencies.
  */
 
-var express = require('express'), routes = require('./routes'), user = require('./routes/user'), http = require('http'), path = require('path'), fs = require('fs');
+var express = require('express'), routes = require('./routes'), http = require('http'), path = require('path'), fs = require('fs');
 
 var app = express();
 
@@ -93,6 +93,7 @@ function initDBConnection() {
 initDBConnection();
 
 app.get('/', routes.index);
+app.get('/client', routes.client);
 
 function generateAddress(name, value, price, pubkey, response) {
 	var watson;
