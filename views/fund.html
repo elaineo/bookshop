@@ -16,8 +16,12 @@
   {% if data %}
     <article>
       <section class="head">
-        <h3></h3>
-        <div class="date">- 20 mar 2012 -</div>
+        <p>Now send {{ data.price }} bits to <a href="bitcoin:{{ data.escrow }}">{{ data.escrow }}</a></p>
+        <div id="qrcode">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={{ data.escrow }}">
+        </div>
+        <h3>{{ data.name}}</h3>
+        <div class="date">- {{ data.value }} - {{ data.price }}</div>
       </section>
     </article>
     {% endif %}
