@@ -67,6 +67,10 @@ table {
 	border-collapse: collapse;
 	width: 100%;
 }
+#expired {
+    font-size:14px;
+    font-weight:normal;
+}
 .content {
 	padding: 5px;
 	width: 50%;

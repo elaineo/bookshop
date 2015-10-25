@@ -73,6 +73,18 @@ function setRowContent(item, row)
 		row.innerHTML = innerHTML+"<td class = 'contentAction'><span class='acceptBtn' onclick='acceptItem(this)' title='accept'></span><span class='deleteBtn' onclick='deleteItem(this)' title='delete me'></span><span class='infoBtn' onclick='infoItem(this)'></span></td>";
 	
 }
+function setExpiredContent(item, row)
+{
+		var innerHTML = "<td class='content'>"+item.name+"</td>";	
+		
+		var valueTextArea = "<td class='contentPrice'>" + item.value +"</td>";		
+
+		innerHTML+=valueTextArea;
+		innerHTML+="<td class='contentPrice'>"+item.price+"</td>";
+		
+		row.innerHTML = innerHTML+"<td class = 'contentAction'><span class='acceptBtn' onclick='finishItem(\""+ item.id +"\")' title='accept'></span><span class='infoBtn' onclick='infoItem(this)'></span></td>";
+	
+}
 function setRowInfo(item, row)
 {
 		var innerHTML = "<td colspan='3'>Created by: " + item.pubkey0 + "<br>";
@@ -98,7 +110,10 @@ function addItem(item, isNew, tableName){
 	
 	if(item) // if not a new row
 	{
-		setRowContent(item, row);
+		if (tableName=='expired')
+			setExpiredContent(item, row);
+		else
+			setRowContent(item, row);
 		// hidden info
 		var infoRow = document.createElement('tr');
 		infoRow.className = "infoRows";
