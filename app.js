@@ -4,7 +4,13 @@
 
 var express = require('express'), routes = require('./routes'), http = require('http'), path = require('path'), fs = require('fs');
 
+var nunjucks = require('nunjucks');
 var app = express();
+
+nunjucks.configure('views', {
+    autoescape: true,
+    express: app
+});
 
 var db;
 
@@ -94,6 +100,8 @@ initDBConnection();
 
 app.get('/', routes.index);
 app.get('/client', routes.client);
+app.get('/create', routes.create);
+app.get('/market', routes.market);
 
 function generateAddress(name, value, price, pubkey, response) {
 	var watson;

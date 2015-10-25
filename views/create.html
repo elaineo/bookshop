@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Create a bet</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <link href="style/client.css" rel="stylesheet" type="text/css" media="all"/>
+  <link rel="stylesheet" href="style/jquery.mobile-1.4.2.min.css" />
+  <link rel="stylesheet" href="style/create.css" />
+  <link rel="stylesheet" href="style/client.css" />
+    <script type="text/javascript" src="scripts/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="scripts/jquery.mobile-1.4.2.min.js"></script>
+    <script src="scripts/nunjucks.js"></script>
+</head>
+
+<body>
+  <div data-role="page">
+    <div id="homepage_content" data-role="content">
+		<h3>Create a Wager</h3>
+
+	<form action="#" method="post" class="label-top">
+	    <input type="text" class='input-address' id="name" placeholder="Wager" data-mini="true">
+        <hr class='input-hr'>
+        <input type="text" class='input-address' id="value" placeholder="Expiration Date" data-mini="true">
+        <hr class='input-hr'>
+        <input type="number" min="1" step="1" class='input-address' id="price" placeholder="Bits to Bet" data-mini="true">
+
+		<button class='ui-mini ui-btn' id='done_btn'>DONE</button>
+	</form>
+    </div>
+  </div>
+</body>
+<script>
+$('#done_btn').click( function(e) {
+    e.preventDefault();
+    data = {
+            name: $('#name').val(),
+            value: $('#value').val(),
+            price: $('#price').val(),
+            pubkey: "036203ca827668edbadf381bc496a5194962170e0437254c156de528c9f46cf8d9"
+        };          
+
+  $.ajax({
+    type: "POST",
+    dataType: "json",
+    contentType: "application/json; charset=utf-8",
+    url: "/api/favorites",
+    data: JSON.stringify(data),
+    success: function(response) {
+      console.log(response);
+      window.location='/client';
+    },
+    complete: function(response) {
+        console.log("ok");
+      window.location='/client';
+    }
+  });
+});
+</script>
+</html>
