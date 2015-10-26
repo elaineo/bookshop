@@ -387,6 +387,8 @@ app.get('/api/expired', function(request, response) {
 					expdb.get(document.id, { revs_info: true }, function(err, doc) {
 						if (!err) {
 							var responseData = createResponseData(doc);
+							if (doc.alchemy)
+								responseData.alchemy = JSON.stringify(doc.alchemy.result);
 							docList.push(responseData);
 							i++;
 							if(i >= len) {

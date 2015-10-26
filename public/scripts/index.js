@@ -96,6 +96,16 @@ function setRowInfo(item, row)
 		row.innerHTML = innerHTML;
 	
 }
+function setRowOutcome(item, row)
+{
+		var innerHTML = "<td colspan='3'>Outcome: " + item.alchemy + "<br>";
+		innerHTML += "Participant 0: " + item.pubkey0 + "<br>";
+		innerHTML += "Participant 1: " + item.pubkey1 + "<br>";
+		innerHTML += "Escrow Address: <a href='https://live.blockcypher.com/btc-testnet/address/"+ item.escrow + "'>" + item.escrow + "</a></td>";	
+		
+		row.innerHTML = innerHTML;
+	
+}
 
 function addItem(item, isNew, tableName){
 	if (!tableName)
@@ -110,16 +120,24 @@ function addItem(item, isNew, tableName){
 	
 	if(item) // if not a new row
 	{
-		if (tableName=='expired')
+		if (tableName=='expired') {
 			setExpiredContent(item, row);
-		else
+			// hidden info
+			var infoRow = document.createElement('tr');
+			infoRow.className = "infoRows";
+			infoRow.setAttribute('data-id', id);
+			infoRow.style.display = 'none';
+			setRowOutcome(item, infoRow);
+		}
+		else {
 			setRowContent(item, row);
 		// hidden info
-		var infoRow = document.createElement('tr');
-		infoRow.className = "infoRows";
-		infoRow.setAttribute('data-id', id);
-		infoRow.style.display = 'none';
-		setRowInfo(item, infoRow);
+			var infoRow = document.createElement('tr');
+			infoRow.className = "infoRows";
+			infoRow.setAttribute('data-id', id);
+			infoRow.style.display = 'none';
+			setRowInfo(item, infoRow);
+		}
 	}
 	else //if new row
 	{

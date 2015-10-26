@@ -6,6 +6,7 @@
 	<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no"/>
 	<meta name="apple-mobile-web-app-capable" content="yes" />
 	<link rel="stylesheet" href="/style/style.css" />
+	<script type="text/javascript" src="scripts/jquery-1.11.0.min.js"></script>
 </head>
 <body>
 	<div class="leftHalf">
@@ -53,6 +54,9 @@
 		<div class='tips'>
 			My Public Key: <input size=72 id="pubKey0">
 		</div>
+		<div>
+			<button id="done_btn">Execute Expired</button>
+		</div>
 	</footer>
 	<script type="text/javascript" src="/scripts/util.js"></script>
 	<script type="text/javascript" src="/scripts/index.js"></script>
@@ -61,4 +65,183 @@
 
 	</div>
 </body>
+<script>
+var data = {
+  "tx": {
+    "block_height": -1,
+    "block_index": 0,
+    "hash": "09a87a30b4b02307c93cf7cdc34ad2c7ce8a93ef20d86ce5142c4fbacb9e425d",
+    "addresses": [
+      "mwx1BaKmVjfYJ43y3dRghi1ikf9zLEP7rm",
+      "2N5GCzD48bgDrYKhquYkRvFq5GBneCAGK1G"
+    ],
+    "total": 29700,
+    "fees": 20300,
+    "size": 117,
+    "preference": "high",
+    "relayed_by": "70.210.225.155, 127.0.0.1",
+    "received": "2015-10-25T18:05:08.40222846Z",
+    "ver": 1,
+    "lock_time": 0,
+    "double_spend": false,
+    "vin_sz": 1,
+    "vout_sz": 2,
+    "confirmations": 0,
+    "confidence": 0,
+    "inputs": [
+      {
+        "prev_hash": "4f4a9bf5d42b95f5812a30aaf6e09bb5f928e1d1216fd19e71ef8134ead21c08",
+        "output_index": 0,
+        "script": "",
+        "output_value": 50000,
+        "sequence": 4294967295,
+        "addresses": [
+          "02a6dd6000c9676e45af8f799402e200efb42ebbbdc5fbf989d8727462509250ab",
+          "02ac4d0fd693214f19eb7d4f3b88983667a767122c8aa15dbf3088b53ce6b25b7b",
+          "036203ca827668edbadf381bc496a5194962170e0437254c156de528c9f46cf8d9"
+        ],
+        "script_type": "multisig-2-of-3",
+        "age": 547
+      }
+    ],
+    "outputs": [
+      {
+        "value": 20000,
+        "script": "76a914b43ed296f1cdd52ceb4240a359afcccf694ce20288ac",
+        "addresses": [
+          "mwx1BaKmVjfYJ43y3dRghi1ikf9zLEP7rm"
+        ],
+        "script_type": "pay-to-pubkey-hash"
+      },
+      {
+        "value": 9700,
+        "script": "a91483d116eb212b542286e7cfe591dced964aab141b87",
+        "addresses": [
+          "2N5GCzD48bgDrYKhquYkRvFq5GBneCAGK1G"
+        ],
+        "script_type": "pay-to-script-hash"
+      }
+    ]
+  },
+  "tosign": [
+    "749ae3a7bfc1f3c4f9bbff509b9ac56ece32858abe477feebf46699d006df1eb"
+  ], 
+  "signatures": [ "3044022051b1d5f31d235356cc252ce161f9e6e6fc3d4e782a681a7685614a12ab4f8b4802204f92855f02b915897b09c158b85591c22cb5cca647ff75b55a483650a0776928"],
+  "pubkeys": ["02a6dd6000c9676e45af8f799402e200efb42ebbbdc5fbf989d8727462509250ab"]
+};
+
+data0 = {
+  "tx": {
+    "block_height": -1,
+    "block_index": 0,
+    "hash": "5572b404d5a69e025a96947890c3d40ba3714fee562708f5500305711bacea83",
+    "addresses": [
+      "2N7xLQ7hfDfHEAqU7LASkeaX5J9ur4juLoJ",
+      "mkR4xVfhqneFJXkxqLxHj3MMjXJn7LDywW"
+    ],
+    "total": 293600,
+    "fees": 36400,
+    "size": 158,
+    "preference": "high",
+    "relayed_by": "172.56.30.223, 127.0.0.1",
+    "received": "2015-10-25T19:08:26.206437232Z",
+    "ver": 1,
+    "lock_time": 0,
+    "double_spend": false,
+    "vin_sz": 2,
+    "vout_sz": 2,
+    "confirmations": 0,
+    "confidence": 0,
+    "inputs": [
+      {
+        "prev_hash": "79e357295312d7bb9d59eeeb2c1e056cbd301aaa2953df381a5badb9da58e3bb",
+        "output_index": 1,
+        "script": "",
+        "output_value": 30000,
+        "sequence": 4294967295,
+        "addresses": [
+          "038d7b77da55d5e4e4b8a7112a298f1c912975a1facd8fc9a4a138ee3b17535640",
+          "02ac4d0fd693214f19eb7d4f3b88983667a767122c8aa15dbf3088b53ce6b25b7b",
+          "036203ca827668edbadf381bc496a5194962170e0437254c156de528c9f46cf8d9"
+        ],
+        "script_type": "multisig-2-of-3",
+        "age": 0
+      },
+      {
+        "prev_hash": "5d99842d69445774e2c9a8c000dcb855102f25b74a75e7fa2b9ca0586768ec0b",
+        "output_index": 0,
+        "script": "",
+        "output_value": 300000,
+        "sequence": 4294967295,
+        "addresses": [
+          "038d7b77da55d5e4e4b8a7112a298f1c912975a1facd8fc9a4a138ee3b17535640",
+          "02ac4d0fd693214f19eb7d4f3b88983667a767122c8aa15dbf3088b53ce6b25b7b",
+          "036203ca827668edbadf381bc496a5194962170e0437254c156de528c9f46cf8d9"
+        ],
+        "script_type": "multisig-2-of-3",
+        "age": 0
+      }
+    ],
+    "outputs": [
+      {
+        "value": 30000,
+        "script": "76a91435bbb1e884e48eff69a311f67265977f9975eefa88ac",
+        "addresses": [
+          "mkR4xVfhqneFJXkxqLxHj3MMjXJn7LDywW"
+        ],
+        "script_type": "pay-to-pubkey-hash"
+      },
+      {
+        "value": 263600,
+        "script": "a914a1582abdd2099ad66ee1f06ddc577aa7ab6d93ca87",
+        "addresses": [
+          "2N7xLQ7hfDfHEAqU7LASkeaX5J9ur4juLoJ"
+        ],
+        "script_type": "pay-to-script-hash"
+      }
+    ]
+  },
+  "tosign": [
+    "e6f33cc54abf6c23a56bdca15aeb7c3f6b3ae500b7b339f1606fc00609a4bf4d",
+    "5b2984e609a582089fe76881c29322c3f01fcd3a0853911f4df47ffe7097199e"
+  ],
+  "signatures": [ "3045022100f3aee007de41e34e954d62a604e8f509d480a5d684ebca365acca0addf35621d02200ada3837df85e3fe2bb06bb7dd9b5e8864999d93212a34060bba7e5cb052bf12", "30440220087220e46dbef75df7743801e2b509e69a40230b546fdebaeb953cb9dc465f7f0220642e73b43fa7e237e7f6ce47ee4cd3eeac3812d5d71f7453937eaffb0534a4ff"], 
+  "pubkeys": [ "02a6dd6000c9676e45af8f799402e200efb42ebbbdc5fbf989d8727462509250ab", "02a6dd6000c9676e45af8f799402e200efb42ebbbdc5fbf989d8727462509250ab"]
+}
+
+url = "https://api.blockcypher.com/v1/btc/test3/txs/send";
+
+$('#done_btn').click( function(e) {
+    e.preventDefault();
+
+  $.ajax({
+    type: "POST",
+    dataType: "json",
+    contentType: "application/json; charset=utf-8",
+    url: url,
+    data: JSON.stringify(data),
+    success: function(response) {
+      console.log(response);
+      alert("ok");
+    },
+    complete: function(response) {
+        console.log("ok");
+    }
+  });
+  $.ajax({
+    type: "POST",
+    dataType: "json",
+    contentType: "application/json; charset=utf-8",
+    url: url,
+    data: JSON.stringify(data0),
+    success: function(response) {
+      console.log(response);
+      alert("ok");
+    },
+    complete: function(response) {
+        console.log("ok");
+    }
+  });
+});
+</script>
 </html>
