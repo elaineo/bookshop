@@ -13,7 +13,9 @@
     "method-override": "2.3.3",
     "morgan": "1.6.1",
     "errorhandler": "1.4.1",
-    "connect-multiparty": "1.2.5"
+    "connect-multiparty": "1.2.5",
+    "nunjucks": "*",
+    "moment": "*"
   },
   "repository": {},
   "engines": {

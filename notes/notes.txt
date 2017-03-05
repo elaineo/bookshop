@@ -1,0 +1,164 @@
+Demo:
+ --create a bet from client
+ --accept a bet from client -> accept -> pay QR code or something
+ validate postdated bets 
+ 
+
+If extra time:
+  account - create public, private key (assume it's stored, coded in html)
+  sort by client
+  sort by available (in market)
+  claim a bet, or show it's paid somehow (slide right, claim)
+
+watson creates template with scriptsig to send to escrow
+when time is up, watson signs escrow to send to winner
+broadcast transaction with lockup date
+
+if counterparty doesn't fund the escrow account within 24 hours, watson can see who bailed and send the money back
+
+
+curl "https://gateway-a.watsonplatform.net/calls/data/GetNews?outputMode=json&start=now-12hd&end=now&q.enriched.url.enrichedTitle.relations.relation=|subject.text=Patriots,action.text=beat,object.text=Jets|&outputMode=json&apikey=dbc8af82cb99f440611bb5aff742728d00888f33"
+
+curl "https://gateway-a.watsonplatform.net/calls/data/GetNews?outputMode=json&start=now-3M&end=now-2M&q.enriched.url.enrichedTitle.relations.relation=|subject.text=Greece,action.text=adopt,object.text=Bitcoin|&outputMode=json&apikey=dbc8af82cb99f440611bb5aff742728d00888f33"
+
+curl "https://gateway-a.watsonplatform.net/calls/data/GetNews?outputMode=json&start=now-3d&end=now&q.enriched.url.enrichedTitle.relations.relation=|subject.text=Seahawks,action.text=beat,object.text=49ers|&outputMode=json&apikey=dbc8af82cb99f440611bb5aff742728d00888f33"
+
+&q.enriched.url.enrichedTitle.docSentiment=|type=positive,score=>0.5|
+
+q.enriched.url.enrichedTitle.relations.relation=|subject.text=Seahawks,action.text=beat,object.text=49ers|
+
+
+https://coinb.in/#sign
+
+addr to pubkey: curl https://blockchain.ir/1ELaiNEsMbADTXr8bpCgNfburgY6vtXPag
+
+{
+  "private": "4a9168c970aa996def5ae6e36fef8b883e420369c70b149b590e0b18beca9654",
+  "public": "02a6dd6000c9676e45af8f799402e200efb42ebbbdc5fbf989d8727462509250ab",
+  "address": "mwx1BaKmVjfYJ43y3dRghi1ikf9zLEP7rm",
+  "wif": "cQ5emusN7w8JChngZbakHQ3Yf2dfxFnra5BkQPWTVGFqwbaQwVHw"
+}
+{
+  "private": "8f86de1078afbc5ddc2e2a3b41339cd486116495827eaddd19db7b9a968b82c5",
+  "public": "02ac4d0fd693214f19eb7d4f3b88983667a767122c8aa15dbf3088b53ce6b25b7b",
+  "address": "mkR4xVfhqneFJXkxqLxHj3MMjXJn7LDywW",
+  "wif": "cSPhVoj8TSiCgDtqx5n47DHhWobS6vv6bJp5jo1U4siFmqy7jCHo"
+} 
+client = {
+  "private": "0c87a75be3e97c6be171f9354b59bed3bc3e53380d8cd7b2a0b79fde42c10165",
+  "public": "036203ca827668edbadf381bc496a5194962170e0437254c156de528c9f46cf8d9",
+  "address": "mhj1wkSFsjAhq597BGg9L9VQGtUCcdZQgq",
+  "wif": "cN14KnHofySRrdkvejnhs4M4zbsW8N8tVKDjXZH1HqFf1R5YoFbo"
+}
+
+curl -d '{"pubkeys": ["02ac4d0fd693214f19eb7d4f3b88983667a767122c8aa15dbf3088b53ce6b25b7b", "036203ca827668edbadf381bc496a5194962170e0437254c156de528c9f46cf8d9", "038d7b77da55d5e4e4b8a7112a298f1c912975a1facd8fc9a4a138ee3b17535640"], "script_type": "multisig-2-of-3"}' https://api.blockcypher.com/v1/btc/test3/addrs
+
+{
+  "private": "",
+  "public": "",
+  "address": "2N5GCzD48bgDrYKhquYkRvFq5GBneCAGK1G",
+  "wif": "",
+  "pubkeys": [
+    "02a6dd6000c9676e45af8f799402e200efb42ebbbdc5fbf989d8727462509250ab",
+    "02ac4d0fd693214f19eb7d4f3b88983667a767122c8aa15dbf3088b53ce6b25b7b",
+    "036203ca827668edbadf381bc496a5194962170e0437254c156de528c9f46cf8d9"
+  ],
+  "script_type": "multisig-2-of-3"
+}
+
+
+send to winner:
+curl -d '{
+    "inputs": [{
+        "addresses"   : [
+    "038d7b77da55d5e4e4b8a7112a298f1c912975a1facd8fc9a4a138ee3b17535640",
+    "02ac4d0fd693214f19eb7d4f3b88983667a767122c8aa15dbf3088b53ce6b25b7b",
+    "036203ca827668edbadf381bc496a5194962170e0437254c156de528c9f46cf8d9"
+  ],
+        "script_type" : "multisig-2-of-3"
+    }],
+    "outputs": [{
+        "addresses" : ["mkR4xVfhqneFJXkxqLxHj3MMjXJn7LDywW"],
+        "value"     : 30000
+    }]
+}' https://api.blockcypher.com/v1/btc/test3/txs/new
+
+{
+  "tx": {
+    "block_height": -1,
+    "hash": "c9d4d9e808a5553835ee47c231d4c1f1c9a3be81ec96b6a41933333b1d6134e0",
+    "addresses": [
+      "2N5GCzD48bgDrYKhquYkRvFq5GBneCAGK1G",
+      "mwx1BaKmVjfYJ43y3dRghi1ikf9zLEP7rm"
+    ],
+    "total": 63600,
+    "fees": 36400,
+    "size": 158,
+    "preference": "high",
+    "relayed_by": "24.6.101.236, 127.0.0.1",
+    "received": "2015-10-22T08:24:39.596221065Z",
+    "ver": 1,
+    "lock_time": 0,
+    "double_spend": false,
+    "vin_sz": 2,
+    "vout_sz": 2,
+    "confirmations": 0,
+    "confidence": 0,
+    "inputs": [
+      {
+        "prev_hash": "898d2478eec6c5f2bc05bcc34e941e8f407b54d59336b05b8a09ac0830a82139",
+        "output_index": 0,
+        "script": "",
+        "output_value": 50000,
+        "sequence": 4294967295,
+        "addresses": [
+          "02a6dd6000c9676e45af8f799402e200efb42ebbbdc5fbf989d8727462509250ab",
+          "02ac4d0fd693214f19eb7d4f3b88983667a767122c8aa15dbf3088b53ce6b25b7b",
+          "036203ca827668edbadf381bc496a5194962170e0437254c156de528c9f46cf8d9"
+        ],
+        "script_type": "multisig-2-of-3",
+        "age": 0
+      },
+      {
+        "prev_hash": "4f4a9bf5d42b95f5812a30aaf6e09bb5f928e1d1216fd19e71ef8134ead21c08",
+        "output_index": 0,
+        "script": "",
+        "output_value": 50000,
+        "sequence": 4294967295,
+        "addresses": [
+          "02a6dd6000c9676e45af8f799402e200efb42ebbbdc5fbf989d8727462509250ab",
+          "02ac4d0fd693214f19eb7d4f3b88983667a767122c8aa15dbf3088b53ce6b25b7b",
+          "036203ca827668edbadf381bc496a5194962170e0437254c156de528c9f46cf8d9"
+        ],
+        "script_type": "multisig-2-of-3",
+        "age": 0
+      }
+    ],
+    "outputs": [
+      {
+        "value": 50000,
+        "script": "76a914b43ed296f1cdd52ceb4240a359afcccf694ce20288ac",
+        "addresses": [
+          "mwx1BaKmVjfYJ43y3dRghi1ikf9zLEP7rm"
+        ],
+        "script_type": "pay-to-pubkey-hash"
+      },
+      {
+        "value": 13600,
+        "script": "a91483d116eb212b542286e7cfe591dced964aab141b87",
+        "addresses": [
+          "2N5GCzD48bgDrYKhquYkRvFq5GBneCAGK1G"
+        ],
+        "script_type": "pay-to-script-hash"
+      }
+    ]
+  },
+  "tosign": [
+    "340fc44f3b238b7dedd78dfb13c277a914bdbc5ef690c5b5fa90181511492027",
+    "0388e578d7ab5324df3a1b7a31fd85b39aedbaf65b5a494c55af6e4f624f3e4c"
+  ],
+  "signatures": ["304402203612179887dd32cad33cf044dacf3d9dbe46ad9695072690f6737922aef3b84b0220645a71f59ec4955c8e7fc8bfab61b30ca9ba2836aadd2624b52996d3450dd144",
+"3044022021492ca5002a845d88cd193d27f8b24561d1b253b5559832d6322f23cfb77d8e022054185dd9bfaf41d1223c4403b397a76f4e3fa054d14bf0f41d7fea7184e304e5"],
+  "pubkeys": ["4a9168c970aa996def5ae6e36fef8b883e420369c70b149b590e0b18beca9654","4a9168c970aa996def5ae6e36fef8b883e420369c70b149b590e0b18beca9654"]
+}
+

@@ -51,7 +51,7 @@ if ('development' == app.get('env')) {
 
 function initDBConnection() {
 	
-	if(process.env.VCAP_SERVICES) {
+	if (false) {//(process.env.VCAP_SERVICES) {
 		var vcapServices = JSON.parse(process.env.VCAP_SERVICES);
 		if(vcapServices.cloudantNoSQLDB) {
 			dbCredentials.host = vcapServices.cloudantNoSQLDB[0].credentials.host;
